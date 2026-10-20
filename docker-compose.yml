@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: jobqueue
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/jobqueue
+      WORKER_TOKEN: secret-worker-token
+      STUCK_JOB_TIMEOUT_MINUTES: "10"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker-1:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      API_URL: http://api:8000
+      WORKER_TOKEN: secret-worker-token
+      WORKER_ID: worker-1
+      POLL_INTERVAL: "2"
+    depends_on:
+      - api
+
+  worker-2:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      API_URL: http://api:8000
+      WORKER_TOKEN: secret-worker-token
+      WORKER_ID: worker-2
+      POLL_INTERVAL: "2"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
