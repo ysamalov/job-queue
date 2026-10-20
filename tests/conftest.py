@@ -1,5 +1,5 @@
 import os
-from collections.abc import AsyncGenerator
+from typing import AsyncGenerator
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient

@@ -1,10 +1,9 @@
-from __future__ import annotations
-
 import asyncio
 import os
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from typing import Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from sqlalchemy import text
@@ -82,7 +81,7 @@ async def get_job(job_id: uuid.UUID, session: AsyncSession = Depends(get_session
 
 # --------------- Worker endpoints ---------------
 
-@app.post("/jobs/claim", response_model=JobClaimed | None)
+@app.post("/jobs/claim", response_model=Optional[JobClaimed])
 async def claim_job(
     session: AsyncSession = Depends(get_session),
     _token: str = Depends(verify_worker_token),

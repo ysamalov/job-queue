@@ -19,7 +19,7 @@ async def _create_job(client: AsyncClient, prompt: str = "test prompt") -> dict:
     return resp.json()
 
 
-async def _claim_job(client: AsyncClient, worker_id: str = "w1") -> dict | None:
+async def _claim_job(client: AsyncClient, worker_id: str = "w1"):
     headers = {**WORKER_HEADERS, "X-Worker-Id": worker_id}
     resp = await client.post("/jobs/claim", headers=headers)
     assert resp.status_code == 200
